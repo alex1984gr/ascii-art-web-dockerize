@@ -1,96 +1,155 @@
-# ASCII-Art-Web
+# ASCII Art Web — Stylized
 
 ## Description
 
-`ascii-art-web` is a Go HTTP server that exposes a web GUI for ASCII-art generation.
-The user submits text and selects a banner, and the server returns the rendered ASCII art.
+`ascii-art-web` is a web application written in Go that lets you turn any text into ASCII art directly in your browser.
 
-Supported banners:
-- `standard`
-- `shadow`
-- `thinkertoy`
+You type some text, pick a banner style, hit **Generate**, and the server returns your text drawn with ASCII characters.
 
-Implemented endpoints:
-- `GET /` renders the main page.
-- `POST /ascii-art` receives form data (`text`, `banner`) and returns the result page.
+This version (`ascii-art-stylize`) adds a fully styled, responsive, and interactive user interface built with HTML and CSS — no external libraries or frameworks needed.
 
-HTTP status codes:
-- `200 OK`: successful request
-- `400 Bad Request`: invalid method, invalid form data, invalid input/banner
-- `404 Not Found`: missing route/template/banner file
-- `500 Internal Server Error`: unexpected server/template/render errors
+---
 
-## Authors
+## What it looks like
 
-- agaliand
+- Dark green theme with bright green accents
+- Works on desktop, tablet, and mobile (responsive design)
+- Live character counter while you type
+- Highlighted banner selection cards
+- Copy-to-clipboard button for the result
+- Clear button to reset the form instantly
+- Toast notification when you copy the result
 
-## Architecture
+---
 
-High-level architecture:
-- `main.go`: server bootstrap (starts HTTP server)
-- `web.go`: HTTP routing + handlers + status-code mapping
-- `templates/index.html`: main GUI template (form + output rendering)
-- `pipeline/web_render.go`: web rendering entrypoint (`RenderASCII`)
-- `pipeline/*`: reusable core logic (validate, load banner, tokenize, render)
+## Supported banner styles
 
-Request flow:
-1. Browser requests `GET /`.
-2. Server loads `templates/index.html` and renders the form.
-3. User submits `POST /ascii-art` with text and selected banner.
-4. Handler validates/parses input and calls `pipeline.RenderASCII`.
-5. Pipeline validates input, loads banner, renders ASCII lines.
-6. Handler renders template with result or returns proper HTTP error code.
+| Banner      | Description                        |
+|-------------|------------------------------------|
+| `standard`  | Classic block ASCII letters        |
+| `shadow`    | Letters with a shadow effect       |
+| `thinkertoy`| Rounded, playful ASCII style       |
 
-## Usage: how to run
+---
 
-From project root:
+## Endpoints
+
+| Method | Path        | What it does                                      |
+|--------|-------------|---------------------------------------------------|
+| GET    | `/`         | Loads the main page with the form                 |
+| POST   | `/ascii-art`| Receives the form data and returns the ASCII art  |
+
+### Form fields sent on POST
+
+- `text` — the text you want to convert
+- `banner` — the banner style you selected (`standard`, `shadow`, or `thinkertoy`)
+
+---
+
+## HTTP status codes
+
+| Code | Meaning                                                                 |
+|------|-------------------------------------------------------------------------|
+| 200  | Everything worked, result is shown                                      |
+| 400  | Bad request — invalid input, missing fields, or wrong HTTP method       |
+| 404  | Not found — wrong URL, missing template file, or missing banner file    |
+| 500  | Server error — something unexpected went wrong on the server side       |
+
+---
+
+## Project structure
+
+```
+ascii-art-web/
+├── main.go                  # Entry point — starts the server
+├── web.go                   # HTTP routes, handlers, and error mapping
+├── templates/
+│   └── index.html           # The web page (HTML + CSS + JS)
+├── banners/
+│   ├── standard.txt         # Standard banner character map
+│   ├── shadow.txt           # Shadow banner character map
+│   └── thinkertoy.txt       # Thinkertoy banner character map
+├── pipeline/
+│   ├── web_render.go        # Entry point for ASCII rendering (RenderASCII)
+│   ├── validateInput.go     # Checks that the input text is valid
+│   ├── loadBanner.go        # Reads the banner file from disk
+│   ├── tokenize.go          # Splits input into renderable tokens
+│   ├── renderLines.go       # Converts tokens into ASCII art lines
+│   └── ...                  # Other pipeline helpers
+└── tests/                   # Unit tests for all pipeline functions
+```
+
+---
+
+## How to run
+
+Make sure you have [Go](https://go.dev/) installed, then from the project root run:
 
 ```bash
 go run .
 ```
 
-Server runs on:
+The server starts on:
 
-```text
+```
 http://localhost:8080
 ```
 
-Manual check:
-1. Open `http://localhost:8080`
-2. Enter text
-3. Select banner
-4. Click submit
+Open that URL in your browser and you will see the app.
 
-## Tests
+---
 
-Run all tests:
+## How to use the app
+
+1. Open `http://localhost:8080` in your browser
+2. Type the text you want to convert in the text box
+3. Select a banner style (Standard, Shadow, or Thinkertoy)
+4. Click **Generate**
+5. Your ASCII art appears below the form
+6. Click **Copy** to copy it to your clipboard
+7. Click **Clear** to reset the form and start over
+
+---
+
+## How to run the tests
+
+Run all tests at once:
 
 ```bash
 go test ./...
 ```
 
-Run a specific test file/package example:
+Run tests for a specific file or function:
 
 ```bash
 go test ./tests -run WebRender
 ```
 
-Note:
-- Use `go test ...` (not `go run .test/...`).
+---
 
-## Implementation details: algorithm
+## How the ASCII rendering works (step by step)
 
-ASCII render algorithm used by web mode:
-1. Normalize input.
-2. Validate input (`ValidateInput`).
-3. Load selected banner file (`LoadBanner`).
-4. Tokenize input (`Tokenize`).
-5. Render token rows to ASCII-art lines (`RenderLines`).
-6. Join lines and return output text.
+1. The user submits the form with `text` and `banner`
+2. The handler reads and validates the form fields
+3. `pipeline.RenderASCII` is called with the text and banner name
+4. The input is validated (no unsupported characters)
+5. The banner file is loaded from the `banners/` folder
+6. The text is tokenized (split into lines and characters)
+7. Each character is looked up in the banner map and drawn line by line
+8. The final ASCII art string is returned to the handler
+9. The handler passes it to the HTML template which displays it on the page
 
-Web handler algorithm:
-1. Validate method and parse form.
-2. Read `text` and `banner`.
-3. Call `RenderASCII`.
-4. Map known errors to `400/404/500`.
-5. Render HTML with output on success.
+---
+
+## Technologies used
+
+- **Go** — HTTP server, routing, HTML templating (`html/template`)
+- **HTML5** — Page structure and form
+- **CSS3** — Styling, responsive layout, animations, and green theme
+- **Vanilla JavaScript** — Character counter, clear button, clipboard copy, toast notification
+
+---
+
+## Authors
+
+- agaliand

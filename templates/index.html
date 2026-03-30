@@ -1,80 +1,403 @@
-<!-- HTML5 document type declaration - tells browser this is a modern HTML5 page -->
 <!DOCTYPE html>
-<!-- Root HTML element with language set to English for accessibility and SEO -->
 <html lang="en">
 <head>
-  <!-- Character encoding set to UTF-8 to support all Unicode characters -->
   <meta charset="UTF-8" />
-  <!-- Viewport meta tag for responsive design on mobile devices -->
+  <!-- Viewport meta ensures the page scales correctly on all screen sizes -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Page title that appears in browser tab -->
   <title>ASCII Art Web</title>
-  <!-- Embedded CSS styles for page layout and appearance -->
   <style>
-    /* Body styling: sans-serif font for readability, 2rem margin for spacing around content */
-    body { font-family: sans-serif; margin: 2rem; }
-    /* Textarea styling: full width up to 900px max, 120px height for input area */
-    textarea { width: 100%; max-width: 900px; height: 120px; }
-    /* Row class for form sections: 1rem vertical margin for spacing between elements */
-    .row { margin: 1rem 0; }
-    /* Pre-formatted text styling: light gray background, padding, preserve whitespace, horizontal scroll if needed */
-    pre { background: #f3f3f3; padding: 1rem; white-space: pre; overflow-x: auto; }
+    /* Universal box-sizing reset: includes padding and border in element dimensions */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Body: dark green background, light green text, centered column layout */
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d1f0d;
+      color: #d4f5d4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    /* Header: centered, spaced below */
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    /* Main title: responsive font size using clamp(), bright green glow effect */
+    header h1 {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      color: #4cff72;
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 12px #4cff7288;
+    }
+
+    /* Subtitle under the main title */
+    header p {
+      color: #7ecf7e;
+      margin-top: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    /* Card container: dark green panel with border, centered, max width for readability */
+    .card {
+      background: #122912;
+      border: 1px solid #2a5c2a;
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 780px;
+      box-shadow: 0 4px 24px #00000066;
+    }
+
+    /* Label for the textarea input */
+    label[for="text"] {
+      display: block;
+      font-weight: 600;
+      color: #4cff72;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    /* Textarea: dark background, full width, resizable vertically */
+    textarea {
+      width: 100%;
+      height: 110px;
+      background: #0d1f0d;
+      color: #d4f5d4;
+      border: 1px solid #2a5c2a;
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-size: 1rem;
+      resize: vertical;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    /* Textarea focus state: green border and subtle glow for visual feedback */
+    textarea:focus {
+      border-color: #4cff72;
+      box-shadow: 0 0 0 3px #4cff7233;
+    }
+
+    /* Character counter: small right-aligned text below the textarea */
+    .char-counter {
+      text-align: right;
+      font-size: 0.78rem;
+      color: #7ecf7e;
+      margin-top: 0.3rem;
+    }
+
+    /* Banner selection group: spaced above the textarea section */
+    .banner-group {
+      margin-top: 1.5rem;
+    }
+
+    /* Banner group label */
+    .banner-group strong {
+      display: block;
+      color: #4cff72;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Banner options: flex row that wraps on small screens */
+    .banner-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    /* Each banner option styled as a clickable pill/card */
+    .banner-options label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #0d1f0d;
+      border: 1px solid #2a5c2a;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      font-size: 0.95rem;
+      user-select: none;
+    }
+
+    /* Hover state for banner option cards */
+    .banner-options label:hover {
+      border-color: #4cff72;
+      background: #163016;
+    }
+
+    /* Radio button styled with green accent color */
+    .banner-options input[type="radio"] {
+      accent-color: #4cff72;
+      width: 1rem;
+      height: 1rem;
+    }
+
+    /* Highlight the text of the selected banner option */
+    .banner-options input[type="radio"]:checked + span {
+      color: #4cff72;
+      font-weight: 600;
+    }
+
+    /* Actions row: holds Generate and Clear buttons */
+    .actions {
+      margin-top: 1.75rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    /* Primary submit button: bright green with dark text */
+    button[type="submit"] {
+      background: #4cff72;
+      color: #0d1f0d;
+      border: none;
+      border-radius: 8px;
+      padding: 0.65rem 2rem;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      box-shadow: 0 2px 10px #4cff7244;
+    }
+
+    /* Submit button hover: slightly darker green with stronger glow */
+    button[type="submit"]:hover {
+      background: #2edf58;
+      box-shadow: 0 4px 16px #4cff7266;
+    }
+
+    /* Submit button press: slight scale down for tactile feedback */
+    button[type="submit"]:active {
+      transform: scale(0.97);
+    }
+
+    /* Secondary button (Clear): transparent with green border */
+    button[type="button"] {
+      background: transparent;
+      color: #7ecf7e;
+      border: 1px solid #2a5c2a;
+      border-radius: 8px;
+      padding: 0.65rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    /* Secondary button hover: green border and text */
+    button[type="button"]:hover {
+      border-color: #4cff72;
+      color: #4cff72;
+    }
+
+    /* Result section: same max-width as the card, spaced above */
+    .result-section {
+      margin-top: 2rem;
+      width: 100%;
+      max-width: 780px;
+    }
+
+    /* Result header row: title on the left, copy button on the right */
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    /* Result section heading */
+    .result-header h2 {
+      color: #4cff72;
+      font-size: 1.1rem;
+    }
+
+    /* Copy button: small, ghost style */
+    .copy-btn {
+      background: transparent;
+      color: #7ecf7e;
+      border: 1px solid #2a5c2a;
+      border-radius: 6px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    /* Copy button hover */
+    .copy-btn:hover {
+      border-color: #4cff72;
+      color: #4cff72;
+    }
+
+    /* Pre block: displays ASCII art with preserved whitespace and horizontal scroll */
+    pre {
+      background: #0a160a;
+      border: 1px solid #2a5c2a;
+      border-radius: 10px;
+      padding: 1.25rem;
+      white-space: pre;
+      overflow-x: auto;
+      /* clamp keeps font readable on all screen sizes */
+      font-size: clamp(0.6rem, 1.5vw, 0.9rem);
+      color: #4cff72;
+      line-height: 1.3;
+      /* max-height prevents the result from pushing the page too long */
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    /* Toast notification: fixed bottom-right, hidden by default */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: #4cff72;
+      color: #0d1f0d;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 999;
+    }
+
+    /* Toast visible state: triggered by JS when copy succeeds */
+    .toast.show { opacity: 1; }
+
+    /* Footer: subtle, small text at the bottom */
+    footer {
+      margin-top: 2.5rem;
+      color: #3a6e3a;
+      font-size: 0.8rem;
+    }
+
+    /* Mobile breakpoint: stack buttons and reduce card padding */
+    @media (max-width: 480px) {
+      .card { padding: 1.25rem; }
+      .actions { flex-direction: column; }
+      button[type="submit"], button[type="button"] { width: 100%; }
+    }
   </style>
 </head>
 <body>
-  <!-- Main heading for the page -->
-  <h1>ASCII Art Web</h1>
 
-  <!-- Form that submits to /ascii-art endpoint using POST method -->
-  <form method="POST" action="/ascii-art">
-    <!-- Container div for text input section -->
-    <div class="row">
-      <!-- Label for the textarea, linked by 'for' attribute to textarea id -->
-      <label for="text">Text</label><br />
-      <!-- Textarea for user input: id links to label, name is form field name, required makes it mandatory -->
-      <!-- {{.Input}} is Go template syntax that displays the previously submitted text -->
-      <textarea id="text" name="text" required>{{.Input}}</textarea>
-    </div>
+  <!-- Page header with title and subtitle -->
+  <header>
+    <h1>&#9608; ASCII Art Web</h1>
+    <p>Transform your text into ASCII art instantly</p>
+  </header>
 
-    <!-- Container div for banner selection section -->
-    <div class="row">
-      <!-- Bold label for the radio button group -->
-      <strong>Banner</strong><br />
-      <!-- Label wrapping first radio button for standard banner -->
-      <label>
-        <!-- Radio button: name groups all banner options, value is sent to server -->
-        <!-- {{if or (eq .Banner "") (eq .Banner "standard")}}checked{{end}} checks this if Banner is empty or "standard" -->
-        <input type="radio" name="banner" value="standard" {{if or (eq .Banner "") (eq .Banner "standard")}}checked{{end}} />
-        standard
-      </label>
-      <!-- Label wrapping second radio button for shadow banner -->
-      <label>
-        <!-- Radio button for shadow banner -->
-        <!-- {{if eq .Banner "shadow"}}checked{{end}} checks this if Banner equals "shadow" -->
-        <input type="radio" name="banner" value="shadow" {{if eq .Banner "shadow"}}checked{{end}} />
-        shadow
-      </label>
-      <!-- Label wrapping third radio button for thinkertoy banner -->
-      <label>
-        <!-- Radio button for thinkertoy banner -->
-        <!-- {{if eq .Banner "thinkertoy"}}checked{{end}} checks this if Banner equals "thinkertoy" -->
-        <input type="radio" name="banner" value="thinkertoy" {{if eq .Banner "thinkertoy"}}checked{{end}} />
-        thinkertoy
-      </label>
-    </div>
+  <!-- Main form card -->
+  <div class="card">
+    <!-- Form posts to /ascii-art endpoint -->
+    <form method="POST" action="/ascii-art" id="artForm">
 
-    <!-- Submit button that sends the form data to the server -->
-    <button type="submit">Generate</button>
-  </form>
+      <!-- Text input section -->
+      <div>
+        <label for="text">Your Text</label>
+        <!-- textarea: maxlength enforced in HTML, Go template fills previous value on re-render -->
+        <textarea id="text" name="text" required maxlength="500" placeholder="Type something here...">{{.Input}}</textarea>
+        <!-- Live character counter updated by JS -->
+        <div class="char-counter"><span id="charCount">0</span> / 500</div>
+      </div>
 
-  <!-- Conditional block: only displays if .Result has content (ASCII art was generated) -->
+      <!-- Banner style selection -->
+      <div class="banner-group">
+        <strong>Banner Style</strong>
+        <div class="banner-options">
+          <!-- Standard banner: checked by default or when previously selected -->
+          <label>
+            <input type="radio" name="banner" value="standard" {{if or (eq .Banner "") (eq .Banner "standard")}}checked{{end}} />
+            <span>Standard</span>
+          </label>
+          <!-- Shadow banner: checked when previously selected -->
+          <label>
+            <input type="radio" name="banner" value="shadow" {{if eq .Banner "shadow"}}checked{{end}} />
+            <span>Shadow</span>
+          </label>
+          <!-- Thinkertoy banner: checked when previously selected -->
+          <label>
+            <input type="radio" name="banner" value="thinkertoy" {{if eq .Banner "thinkertoy"}}checked{{end}} />
+            <span>Thinkertoy</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Form action buttons -->
+      <div class="actions">
+        <!-- Submit button sends the form to the server -->
+        <button type="submit">&#9654; Generate</button>
+        <!-- Clear button resets the textarea via JS without a page reload -->
+        <button type="button" onclick="clearForm()">&#10005; Clear</button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Result section: only rendered by Go template when ASCII art has been generated -->
   {{if .Result}}
-  <!-- Heading for the results section -->
-  <h2>Result</h2>
-  <!-- Pre-formatted text block that displays the ASCII art result -->
-  <!-- {{.Result}} is Go template syntax that outputs the generated ASCII art -->
-  <!-- The 'pre' tag preserves all spaces and line breaks which are essential for ASCII art -->
-  <pre>{{.Result}}</pre>
+  <div class="result-section">
+    <div class="result-header">
+      <h2>&#9608; Result</h2>
+      <!-- Copy button triggers JS clipboard copy -->
+      <button class="copy-btn" onclick="copyResult()">&#128203; Copy</button>
+    </div>
+    <!-- Pre tag preserves all spaces and newlines required by ASCII art -->
+    <pre id="resultPre">{{.Result}}</pre>
+  </div>
   {{end}}
+
+  <!-- Page footer -->
+  <footer>ASCII Art Web &mdash; Powered by Go</footer>
+
+  <!-- Toast notification shown briefly after a successful copy -->
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    // Get references to the textarea and character counter span
+    const ta = document.getElementById('text');
+    const counter = document.getElementById('charCount');
+
+    // Update the character counter to reflect current textarea length
+    function updateCount() {
+      counter.textContent = ta.value.length;
+    }
+
+    // Listen for any input change and update the counter live
+    ta.addEventListener('input', updateCount);
+
+    // Run once on page load to show count for pre-filled values (Go template)
+    updateCount();
+
+    // Clear the textarea and reset the counter, then focus for quick re-use
+    function clearForm() {
+      ta.value = '';
+      updateCount();
+      ta.focus();
+    }
+
+    // Copy the ASCII art result to the clipboard and show a toast confirmation
+    function copyResult() {
+      const pre = document.getElementById('resultPre');
+      if (!pre) return;
+      navigator.clipboard.writeText(pre.textContent).then(() => {
+        const toast = document.getElementById('toast');
+        // Show the toast then hide it after 2 seconds
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      });
+    }
+  </script>
+
 </body>
 </html>
